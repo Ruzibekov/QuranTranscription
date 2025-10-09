@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Qur’an Transcription"
+rootProject.name = "Қуръон транскрипцияси"
 include(":app")

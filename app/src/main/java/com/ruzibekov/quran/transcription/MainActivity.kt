@@ -8,9 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
-import com.ruzibekov.quran.transcription.ui.screens.HomeScreen
-import com.ruzibekov.quran.transcription.ui.screens.SurahDetailScreen
-import com.ruzibekov.quran.transcription.ui.screens.SurahDetailViewModel
+import com.ruzibekov.quran.transcription.ui.screens.home.HomeScreen
+import com.ruzibekov.quran.transcription.ui.screens.detail.SurahDetailScreen
+import com.ruzibekov.quran.transcription.ui.screens.detail.SurahDetailViewModel
 import com.ruzibekov.quran.transcription.ui.theme.QuranTranscriptionTheme
 import androidx.navigation.NavType
 
