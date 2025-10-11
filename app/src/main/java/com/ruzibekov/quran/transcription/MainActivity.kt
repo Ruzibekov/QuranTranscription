@@ -44,7 +44,12 @@ class MainActivity : ComponentActivity() {
                         SurahDetailScreen(
                             onNavigateBack = { navController.popBackStack() },
                             onNavigateNext = { nextSurahId ->
-                                navController.navigate(AppRoute.SurahDetail.createRoute(nextSurahId))
+                                navController.navigate(AppRoute.SurahDetail.createRoute(nextSurahId)) {
+                                    popUpTo(AppRoute.SurahDetail.route) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
+                                }
                             },
                         )
                     }
