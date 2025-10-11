@@ -1,5 +1,6 @@
 package com.ruzibekov.quran.transcription.ui.screens.detail
 
+import android.provider.CalendarContract
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +34,9 @@ fun SurahDetailScreen(
     onNavigateBack: () -> Unit,
     surahId: Int,
     viewModel: SurahDetailViewModel = viewModel(
-        factory = SurahDetailViewModel.provideFactory(surahId = surahId),
+        factory = SurahDetailViewModel.provideFactory(
+            surahId = surahId
+        )
     ),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -51,40 +55,39 @@ fun SurahDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = Color.Transparent,
                 ),
             )
         },
     ) { innerPadding ->
-        if (surah == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (surah == null)
                 Text(text = "Сура топилмади", style = MaterialTheme.typography.bodyMedium)
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(innerPadding)
-                    .padding(horizontal = 20.dp, vertical = 24.dp),
-            ) {
-                Text(
-                    text = surah.arabicName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = surah.transliteration,
-                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(top = 16.dp),
-                )
-            }
+            else
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(innerPadding)
+                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                ) {
+                    Text(
+                        text = surah.arabicName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = surah.transliteration,
+                        style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+                }
         }
     }
 }

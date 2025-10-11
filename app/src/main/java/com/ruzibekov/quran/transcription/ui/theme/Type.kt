@@ -2,11 +2,18 @@ package com.ruzibekov.quran.transcription.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-private val QuranFontFamily = FontFamily.Serif
+import com.ruzibekov.quran.transcription.R
+
+private val QuranFontFamily = FontFamily(
+    Font(R.font.andika_regular, weight = FontWeight.Normal),
+    Font(R.font.andika_bold, weight = FontWeight.SemiBold),
+    Font(R.font.andika_bold, weight = FontWeight.Bold)
+)
 
 val Typography = Typography(
     bodyLarge = TextStyle(
