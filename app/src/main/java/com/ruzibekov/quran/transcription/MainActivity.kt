@@ -4,16 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
-import com.ruzibekov.quran.transcription.ui.screens.home.HomeScreen
+import androidx.navigation.navArgument
 import com.ruzibekov.quran.transcription.ui.screens.detail.SurahDetailScreen
 import com.ruzibekov.quran.transcription.ui.screens.detail.SurahDetailViewModel
+import com.ruzibekov.quran.transcription.ui.screens.home.HomeScreen
 import com.ruzibekov.quran.transcription.ui.theme.QuranTranscriptionTheme
-import androidx.navigation.NavType
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,11 +38,14 @@ class MainActivity : ComponentActivity() {
                         route = AppRoute.SurahDetail.route,
                         arguments = listOf(navArgument(SurahDetailViewModel.ARG_SURAH_ID) { type = NavType.IntType }),
                     ) { backStackEntry ->
-                        val surahId = backStackEntry.arguments?.getInt(SurahDetailViewModel.ARG_SURAH_ID)
-                            ?: return@composable
+                        if (backStackEntry.arguments?.containsKey(SurahDetailViewModel.ARG_SURAH_ID) != true) {
+                            return@composable
+                        }
                         SurahDetailScreen(
                             onNavigateBack = { navController.popBackStack() },
-                            surahId = surahId,
+                            onNavigateNext = { nextSurahId ->
+                                navController.navigate(AppRoute.SurahDetail.createRoute(nextSurahId))
+                            },
                         )
                     }
                 }

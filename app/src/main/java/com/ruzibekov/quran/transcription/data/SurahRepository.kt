@@ -1,6 +1,8 @@
 package com.ruzibekov.quran.transcription.data
 
-class SurahRepository {
+import javax.inject.Inject
+
+class SurahRepository @Inject constructor() {
 
     private val surahs = listOf(
         Surah(
@@ -7062,4 +7064,9 @@ class SurahRepository {
 
     fun getSurahs(): List<Surah> = surahs
     fun getSurahById(id: Int): Surah? = surahs.firstOrNull { it.id == id }
+    fun getNextSurahId(currentId: Int): Int? {
+        val currentIndex = surahs.indexOfFirst { it.id == currentId }
+        if (currentIndex == -1) return null
+        return surahs.getOrNull(currentIndex + 1)?.id
+    }
 }
