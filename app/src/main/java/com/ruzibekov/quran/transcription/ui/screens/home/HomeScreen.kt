@@ -29,6 +29,8 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -148,12 +150,42 @@ fun HomeScreen(
                     ),
                 )
 
-                Text(
-                    text = "Қидирув орқали сура номларини осон топинг.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Row(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilterChip(
+                        selected = !uiState.showFavoritesOnly,
+                        onClick = {
+                            if (uiState.showFavoritesOnly) viewModel.toggleFavoritesFilter()
+                        },
+                        label = { Text("Ҳаммаси") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    )
+                    FilterChip(
+                        selected = uiState.showFavoritesOnly,
+                        onClick = {
+                            if (!uiState.showFavoritesOnly) viewModel.toggleFavoritesFilter()
+                        },
+                        label = { Text("Севимлилар") },
+                        leadingIcon = if (uiState.showFavoritesOnly) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Star,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                )
+                            }
+                        } else null,
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -166,7 +198,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = "Натижа топилмади",
+                            text = if (uiState.showFavoritesOnly) "Севимли суралар йўқ" else "Натижа топилмади",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

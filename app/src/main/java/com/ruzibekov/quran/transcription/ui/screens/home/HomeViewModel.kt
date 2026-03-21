@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { current ->
                     current.copy(
                         favoriteIds = favorites,
-                        surahs = filterAndSort(query = current.searchQuery, favorites = favorites),
+                        surahs = filterAndSort(query = current.searchQuery, favorites = favorites, favoritesOnly = current.showFavoritesOnly),
                     )
                 }
             }
@@ -46,7 +46,7 @@ class HomeViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 searchQuery = query,
-                surahs = filterAndSort(query = query, favorites = it.favoriteIds),
+                surahs = filterAndSort(query = query, favorites = it.favoriteIds, favoritesOnly = it.showFavoritesOnly),
             )
         }
     }
@@ -57,19 +57,30 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun filterAndSort(query: String, favorites: Set<Int>): List<Surah> {
-        val base = if (query.isBlank()) {
-            allSurahs
-        } else {
-            allSurahs.filter { surah ->
-                surah.latinName.contains(query, ignoreCase = true) ||
-                    surah.arabicName.contains(query, ignoreCase = true)
-            }
+    fun toggleFavoritesFilter() {
+        _uiState.update {
+            val newFilter = !it.showFavoritesOnly
+            it.copy(
+                showFavoritesOnly = newFilter,
+                surahs = filterAndSort(query = it.searchQuery, favorites = it.favoriteIds, favoritesOnly = newFilter),
+            )
         }
-        return base.sortedWith(
-            compareByDescending<Surah> { favorites.contains(it.id) }
-                .thenBy { it.id },
-        )
+    }
+
+    private fun filterAndSort(query: String, favorites: Set<Int>, favoritesOnly: Boolean = false): List<Surah> {
+        return allSurahs
+            .let { surahs ->
+                if (query.isBlank()) surahs
+                else surahs.filter { it.latinName.contains(query, ignoreCase = true) || it.arabicName.contains(query, ignoreCase = true) }
+            }
+            .let { surahs ->
+                if (favoritesOnly) surahs.filter { favorites.contains(it.id) }
+                else surahs
+            }
+            .sortedWith(
+                compareByDescending<Surah> { favorites.contains(it.id) }
+                    .thenBy { it.id },
+            )
     }
 }
 
@@ -77,4 +88,5 @@ data class HomeUiState(
     val surahs: List<Surah> = emptyList(),
     val searchQuery: String = "",
     val favoriteIds: Set<Int> = emptySet(),
+    val showFavoritesOnly: Boolean = false,
 )
