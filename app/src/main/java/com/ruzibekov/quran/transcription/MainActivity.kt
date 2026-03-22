@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,7 +32,15 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = AppRoute.Home.route,
                 ) {
-                    composable(AppRoute.Home.route) {
+                    composable(
+                        route = AppRoute.Home.route,
+                        exitTransition = {
+                            fadeOut(animationSpec = tween(200))
+                        },
+                        popEnterTransition = {
+                            fadeIn(animationSpec = tween(250))
+                        },
+                    ) {
                         HomeScreen(
                             onSurahSelected = { surahId ->
                                 navController.navigate(AppRoute.SurahDetail.createRoute(surahId))
@@ -37,6 +50,18 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = AppRoute.SurahDetail.route,
                         arguments = listOf(navArgument(SurahDetailViewModel.ARG_SURAH_ID) { type = NavType.IntType }),
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it / 3 },
+                                animationSpec = tween(300),
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it / 3 },
+                                animationSpec = tween(250),
+                            ) + fadeOut(animationSpec = tween(250))
+                        },
                     ) { backStackEntry ->
                         if (backStackEntry.arguments?.containsKey(SurahDetailViewModel.ARG_SURAH_ID) != true) {
                             return@composable

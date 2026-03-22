@@ -35,7 +35,11 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { current ->
                     current.copy(
                         favoriteIds = favorites,
-                        surahs = filterAndSort(query = current.searchQuery, favorites = favorites, favoritesOnly = current.showFavoritesOnly),
+                        surahs = filterAndSort(
+                            query = current.searchQuery,
+                            favorites = favorites,
+                            filter = current.selectedFilter,
+                        ),
                     )
                 }
             }
@@ -46,7 +50,24 @@ class HomeViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 searchQuery = query,
-                surahs = filterAndSort(query = query, favorites = it.favoriteIds, favoritesOnly = it.showFavoritesOnly),
+                surahs = filterAndSort(
+                    query = query,
+                    favorites = it.favoriteIds,
+                    filter = it.selectedFilter,
+                ),
+            )
+        }
+    }
+
+    fun selectFilter(filter: SurahFilter) {
+        _uiState.update {
+            it.copy(
+                selectedFilter = filter,
+                surahs = filterAndSort(
+                    query = it.searchQuery,
+                    favorites = it.favoriteIds,
+                    filter = filter,
+                ),
             )
         }
     }
@@ -57,25 +78,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavoritesFilter() {
-        _uiState.update {
-            val newFilter = !it.showFavoritesOnly
-            it.copy(
-                showFavoritesOnly = newFilter,
-                surahs = filterAndSort(query = it.searchQuery, favorites = it.favoriteIds, favoritesOnly = newFilter),
-            )
-        }
-    }
-
-    private fun filterAndSort(query: String, favorites: Set<Int>, favoritesOnly: Boolean = false): List<Surah> {
+    private fun filterAndSort(
+        query: String,
+        favorites: Set<Int>,
+        filter: SurahFilter = SurahFilter.ALL,
+    ): List<Surah> {
         return allSurahs
             .let { surahs ->
                 if (query.isBlank()) surahs
-                else surahs.filter { it.latinName.contains(query, ignoreCase = true) || it.arabicName.contains(query, ignoreCase = true) }
+                else surahs.filter {
+                    it.latinName.contains(query, ignoreCase = true) ||
+                        it.arabicName.contains(query, ignoreCase = true)
+                }
             }
             .let { surahs ->
-                if (favoritesOnly) surahs.filter { favorites.contains(it.id) }
-                else surahs
+                when (filter) {
+                    SurahFilter.ALL -> surahs
+                    SurahFilter.FAVORITES -> surahs.filter { favorites.contains(it.id) }
+                }
             }
             .sortedWith(
                 compareByDescending<Surah> { favorites.contains(it.id) }
@@ -84,9 +104,13 @@ class HomeViewModel @Inject constructor(
     }
 }
 
+enum class SurahFilter {
+    ALL, FAVORITES
+}
+
 data class HomeUiState(
     val surahs: List<Surah> = emptyList(),
     val searchQuery: String = "",
     val favoriteIds: Set<Int> = emptySet(),
-    val showFavoritesOnly: Boolean = false,
+    val selectedFilter: SurahFilter = SurahFilter.ALL,
 )
