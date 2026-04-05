@@ -51,7 +51,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.ruzibekov.quran.transcription.ui.theme.PrimaryGreenLight
-import com.ruzibekov.quran.transcription.ui.theme.TextMutedColor
 import kotlinx.coroutines.delay
 
 @Composable
@@ -161,12 +160,12 @@ fun AudioPlayerBar(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(18.dp),
-        shadowElevation = 4.dp,
+        shadowElevation = 6.dp,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -265,7 +264,7 @@ fun AudioPlayerBar(
                     Text(
                         text = "Юкланмоқда...",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMutedColor,
+                        color = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                 } else if (hasError) {
@@ -304,12 +303,20 @@ fun AudioPlayerBar(
                     Text(
                         text = formatTime(currentPosition),
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMutedColor,
+                        color = MaterialTheme.colorScheme.outline,
                     )
+                    if (verseCount > 0 && lastAyahIndex >= 0) {
+                        Text(
+                            text = "Оят ${lastAyahIndex + 1}/$verseCount",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     Text(
                         text = formatTime(duration),
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMutedColor,
+                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
             }

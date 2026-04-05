@@ -2,11 +2,14 @@ package com.ruzibekov.quran.transcription.ui.screens.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,15 +30,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,8 +53,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,14 +77,14 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.res.Configuration
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ruzibekov.quran.transcription.data.Surah
-import com.ruzibekov.quran.transcription.ui.theme.SecondaryAmber
-import com.ruzibekov.quran.transcription.ui.theme.SecondaryAmberLight
-import com.ruzibekov.quran.transcription.ui.theme.TextMutedColor
+import com.ruzibekov.quran.transcription.ui.theme.ArabicFontFamily
 import kotlin.math.PI
 import kotlinx.coroutines.launch
 import kotlin.math.cos
@@ -90,9 +96,27 @@ fun HomeScreen(
     onSurahSelected: (Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val haptic = LocalHapticFeedback.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.scrollToTop.collect {
+            listState.animateScrollToItem(0)
+        }
+    }
+
+    val isSearchVisible by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 &&
+                listState.firstVisibleItemScrollOffset < 100
+        }
+    }
 
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
@@ -108,58 +132,73 @@ fun HomeScreen(
     ) {
         Scaffold(
             containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    title = {},
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                    ),
-                )
-            },
+            contentWindowInsets = WindowInsets(0),
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .windowInsetsPadding(WindowInsets.statusBars),
             ) {
                 Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column {
+                    Spacer(modifier = Modifier.height(if (isLandscape) 4.dp else 8.dp))
+                    if (isLandscape) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom,
+                        ) {
                             Text(
                                 text = "Қуръон суралар",
-                                style = MaterialTheme.typography.headlineLarge,
+                                style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "114 сура — ўзбек транслитерация",
+                                text = if (uiState.searchQuery.isNotBlank() || uiState.selectedFilter == SurahFilter.FAVORITES)
+                                    "${uiState.surahs.size} сура топилди"
+                                else "114 сура",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = TextMutedColor,
+                                color = MaterialTheme.colorScheme.outline,
                             )
                         }
+                    } else {
+                        Text(
+                            text = "Қуръон суралар",
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = if (uiState.searchQuery.isNotBlank() || uiState.selectedFilter == SurahFilter.FAVORITES)
+                                "${uiState.surahs.size} сура топилди"
+                            else "114 сура — ўзбек транслитерация",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    AnimatedVisibility(
+                        visible = isSearchVisible || uiState.searchQuery.isNotBlank(),
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
+                        Column {
+                            Spacer(modifier = Modifier.height(14.dp))
 
-                    OutlinedTextField(
+                            OutlinedTextField(
                         value = uiState.searchQuery,
                         onValueChange = viewModel::updateSearchQuery,
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = {
                             Text(
                                 text = "Сура номи бўйича қидириш",
-                                color = TextMutedColor,
+                                color = MaterialTheme.colorScheme.outline,
                             )
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = null,
-                                tint = TextMutedColor,
+                                tint = MaterialTheme.colorScheme.outline,
                             )
                         },
                         trailingIcon = {
@@ -195,14 +234,16 @@ fun HomeScreen(
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
                         ),
                     )
+                        }
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(vertical = 10.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
                 ) {
                     item {
                         FilterChip(
@@ -223,18 +264,28 @@ fun HomeScreen(
                 if (uiState.surahs.isEmpty()) {
                     val isFavoritesFilter = uiState.selectedFilter == SurahFilter.FAVORITES
 
+                    val emptyAnim = remember { Animatable(0f) }
+                    LaunchedEffect(uiState.selectedFilter) {
+                        emptyAnim.snapTo(0f)
+                        emptyAnim.animateTo(1f, tween(500, easing = FastOutSlowInEasing))
+                    }
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 16.dp)
+                            .graphicsLayer {
+                                alpha = emptyAnim.value
+                                translationY = (1f - emptyAnim.value) * 40f
+                            },
                         contentAlignment = Alignment.Center,
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Surface(
-                                modifier = Modifier.size(80.dp),
-                                shape = RoundedCornerShape(24.dp),
-                                color = if (isFavoritesFilter) SecondaryAmberLight
+                                modifier = Modifier.size(88.dp),
+                                shape = RoundedCornerShape(28.dp),
+                                color = if (isFavoritesFilter) MaterialTheme.colorScheme.secondaryContainer
                                 else MaterialTheme.colorScheme.primaryContainer,
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -242,8 +293,8 @@ fun HomeScreen(
                                         imageVector = if (isFavoritesFilter) Icons.Outlined.Star
                                         else Icons.Filled.Search,
                                         contentDescription = null,
-                                        modifier = Modifier.size(36.dp),
-                                        tint = if (isFavoritesFilter) SecondaryAmber
+                                        modifier = Modifier.size(40.dp),
+                                        tint = if (isFavoritesFilter) MaterialTheme.colorScheme.secondary
                                         else MaterialTheme.colorScheme.primary,
                                     )
                                 }
@@ -260,12 +311,13 @@ fun HomeScreen(
                                 text = if (isFavoritesFilter) "⭐ белгисини босиб сура қўшинг"
                                 else "Бошқа калит сўз билан қидириб кўринг",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = TextMutedColor,
+                                color = MaterialTheme.colorScheme.outline,
                             )
                         }
                     }
                 } else {
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
@@ -299,6 +351,7 @@ fun HomeScreen(
                                 SurahCard(
                                     surah = surah,
                                     isFavorite = uiState.favoriteIds.contains(surah.id),
+                                    isListened = uiState.listenedIds.contains(surah.id),
                                     onClick = {
                                         focusManager.clearFocus()
                                         onSurahSelected(surah.id)
@@ -330,9 +383,9 @@ private fun FilterChip(
         contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
         border = if (selected) null else androidx.compose.foundation.BorderStroke(
             1.5.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
         ),
-        shadowElevation = if (selected) 4.dp else 0.dp,
+        shadowElevation = if (selected) 2.dp else 0.dp,
     ) {
         Text(
             text = text,
@@ -346,10 +399,12 @@ private fun FilterChip(
 private fun SurahCard(
     surah: Surah,
     isFavorite: Boolean,
+    isListened: Boolean = false,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -374,8 +429,14 @@ private fun SurahCard(
             }
             .clip(RoundedCornerShape(18.dp))
             .drawBehind {
+                val borderColor = if (isFavorite) secondaryColor else primaryColor
                 drawRoundRect(
-                    color = primaryColor.copy(alpha = 0.08f),
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            borderColor.copy(alpha = 0.3f),
+                            borderColor.copy(alpha = 0.05f),
+                        ),
+                    ),
                     size = Size(3.5.dp.toPx(), size.height),
                     cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx()),
                 )
@@ -393,16 +454,16 @@ private fun SurahCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier.size(46.dp),
+                modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Canvas(modifier = Modifier.size(46.dp)) {
+                Canvas(modifier = Modifier.size(48.dp)) {
                     drawSurahNumberOrnament(containerColor, primaryColor)
                 }
                 Text(
                     text = "${surah.id}",
                     style = MaterialTheme.typography.labelMedium.copy(
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                     ),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -424,9 +485,11 @@ private fun SurahCard(
                     Text(
                         text = surah.arabicName,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = ArabicFontFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp,
                         ),
-                        color = SecondaryAmber,
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                 }
 
@@ -441,57 +504,93 @@ private fun SurahCard(
                     Text(
                         text = snippet + if (surah.transliteration.length > snippet.length) "…" else "",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextMutedColor,
+                        color = MaterialTheme.colorScheme.outline,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val ayahCount = surah.transliteration.lines()
+                        .count { it.isNotBlank() }
+                        .let { count ->
+                            val first = surah.transliteration.lines().firstOrNull()?.trim() ?: ""
+                            if (first.startsWith("Бисмиллааҳир", ignoreCase = true)) count - 1 else count
+                        }
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                    ) {
+                        Text(
+                            text = "$ayahCount оят",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (surah.revelationType == "Маданий")
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+                        else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                    ) {
+                        Text(
+                            text = surah.revelationType,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (surah.revelationType == "Маданий")
+                                MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        )
+                    }
+                    if (isListened) {
+                        Icon(
+                            imageVector = Icons.Filled.Headphones,
+                            contentDescription = "Тинглаган",
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                        )
+                    }
+                }
             }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        favScale.animateTo(
+                            1.3f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium,
+                            ),
+                        )
+                        favScale.animateTo(
+                            1f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium,
+                            ),
+                        )
+                    }
+                    onToggleFavorite()
+                },
+                modifier = Modifier
+                    .size(44.dp)
+                    .scale(favScale.value)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isFavorite) MaterialTheme.colorScheme.secondaryContainer
+                        else Color.Transparent,
+                    ),
             ) {
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            favScale.animateTo(
-                                1.3f,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMedium,
-                                ),
-                            )
-                            favScale.animateTo(
-                                1f,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMedium,
-                                ),
-                            )
-                        }
-                        onToggleFavorite()
-                    },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .scale(favScale.value)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            if (isFavorite) SecondaryAmberLight
-                            else Color.Transparent,
-                        ),
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                        contentDescription = if (isFavorite) "Sevimlidan chiqarish" else "Sevimlilarga qo'shish",
-                        tint = if (isFavorite) SecondaryAmber else TextMutedColor,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
                 Icon(
-                    imageVector = Icons.Outlined.ChevronRight,
-                    contentDescription = null,
-                    tint = TextMutedColor.copy(alpha = 0.4f),
-                    modifier = Modifier.size(16.dp),
+                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                    contentDescription = if (isFavorite) "Sevimlidan chiqarish" else "Sevimlilarga qo'shish",
+                    tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(22.dp),
                 )
             }
         }

@@ -5,4 +5,5 @@ data class Surah(
     val arabicName: String,
     val latinName: String,
     val transliteration: String,
+    val revelationType: String = "Маккий",
 )

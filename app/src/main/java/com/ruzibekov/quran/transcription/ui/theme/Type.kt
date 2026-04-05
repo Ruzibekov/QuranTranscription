@@ -12,7 +12,12 @@ import com.ruzibekov.quran.transcription.R
 private val QuranFontFamily = FontFamily(
     Font(R.font.andika_regular, weight = FontWeight.Normal),
     Font(R.font.andika_bold, weight = FontWeight.SemiBold),
-    Font(R.font.andika_bold, weight = FontWeight.Bold)
+    Font(R.font.andika_bold, weight = FontWeight.Bold),
+)
+
+val ArabicFontFamily = FontFamily(
+    Font(R.font.amiri_regular, weight = FontWeight.Normal),
+    Font(R.font.amiri_bold, weight = FontWeight.Bold),
 )
 
 val Typography = Typography(

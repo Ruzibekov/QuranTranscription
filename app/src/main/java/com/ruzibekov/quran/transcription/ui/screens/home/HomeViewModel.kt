@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruzibekov.quran.transcription.data.Surah
 import com.ruzibekov.quran.transcription.data.SurahRepository
+import com.ruzibekov.quran.transcription.data.local.AudioPositionDataSource
 import com.ruzibekov.quran.transcription.data.local.FavoritesDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -17,6 +20,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel @Inject constructor(
     repository: SurahRepository,
     private val favoritesDataSource: FavoritesDataSource,
+    audioPositionDataSource: AudioPositionDataSource,
 ) : ViewModel() {
 
     private val allSurahs: List<Surah> = repository.getSurahs()
@@ -28,6 +32,9 @@ class HomeViewModel @Inject constructor(
         ),
     )
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private val _scrollToTop = Channel<Unit>(Channel.CONFLATED)
+    val scrollToTop = _scrollToTop.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -42,6 +49,11 @@ class HomeViewModel @Inject constructor(
                         ),
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            audioPositionDataSource.listenedSurahIdsFlow.collect { listened ->
+                _uiState.update { it.copy(listenedIds = listened) }
             }
         }
     }
@@ -70,6 +82,7 @@ class HomeViewModel @Inject constructor(
                 ),
             )
         }
+        _scrollToTop.trySend(Unit)
     }
 
     fun toggleFavorite(id: Int) {
@@ -112,5 +125,6 @@ data class HomeUiState(
     val surahs: List<Surah> = emptyList(),
     val searchQuery: String = "",
     val favoriteIds: Set<Int> = emptySet(),
+    val listenedIds: Set<Int> = emptySet(),
     val selectedFilter: SurahFilter = SurahFilter.ALL,
 )
