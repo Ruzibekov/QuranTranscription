@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.hilt.android) apply false
+    alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.ktlint) apply false
 }
 
 subprojects {
@@ -12,4 +14,12 @@ subprojects {
             force("com.squareup:javapoet:1.13.0")
         }
     }
+}
+
+tasks.register("detekt") {
+    dependsOn(":app:detekt")
+}
+
+tasks.register("ktlintCheck") {
+    dependsOn(":app:ktlintCheck")
 }

@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class SurahRepositoryTest {
-
     private val repository = SurahRepository()
 
     @Test
@@ -27,4 +26,3 @@ class SurahRepositoryTest {
         assertEquals("Al-Faatiha", surah.latinName)
     }
 }
-

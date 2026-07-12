@@ -5,7 +5,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+
+data class SurahHeaderGradient(
+    val madaniyColors: List<Color>,
+    val makkiyColors: List<Color>,
+)
+
+val LocalSurahHeaderGradient = staticCompositionLocalOf {
+    SurahHeaderGradient(
+        madaniyColors = listOf(MadaniyGradientStart, MadaniyGradientMid, MadaniyGradientEnd),
+        makkiyColors = listOf(PrimaryGreen, PrimaryGreenLight, MakkiyGradientEnd),
+    )
+}
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryGreen,
@@ -70,9 +84,23 @@ fun QuranTranscriptionTheme(
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content,
-    )
+    val headerGradient = if (darkTheme) {
+        SurahHeaderGradient(
+            madaniyColors = listOf(DarkMadaniyGradientStart, DarkMadaniyGradientMid, DarkMadaniyGradientEnd),
+            makkiyColors = listOf(DarkPrimaryGreen, DarkPrimaryGreen.copy(alpha = 0.8f), DarkMakkiyGradientEnd),
+        )
+    } else {
+        SurahHeaderGradient(
+            madaniyColors = listOf(MadaniyGradientStart, MadaniyGradientMid, MadaniyGradientEnd),
+            makkiyColors = listOf(PrimaryGreen, PrimaryGreenLight, MakkiyGradientEnd),
+        )
+    }
+
+    CompositionLocalProvider(LocalSurahHeaderGradient provides headerGradient) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content,
+        )
+    }
 }

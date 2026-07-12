@@ -37,6 +37,18 @@ val DarkTextPrimaryColor = Color(0xFFE0EDE8)
 val DarkTextSecondaryColor = Color(0xFFA5B5AD)
 val DarkTextMutedColor = Color(0xFF6E8078)
 
+// Surah header gradient — Madaniy (Medinan)
+val MadaniyGradientStart = Color(0xFF0A5C6B)
+val MadaniyGradientMid = Color(0xFF148A91)
+val MadaniyGradientEnd = Color(0xFF1AABB0)
+val DarkMadaniyGradientStart = Color(0xFF0E4A55)
+val DarkMadaniyGradientMid = Color(0xFF117A80)
+val DarkMadaniyGradientEnd = Color(0xFF149994)
+
+// Surah header gradient — Makkiy (Meccan)
+val MakkiyGradientEnd = Color(0xFF1AAB95)
+val DarkMakkiyGradientEnd = Color(0xFF14997F)
+
 val TextMutedColorComposable: Color
     @Composable
     @ReadOnlyComposable

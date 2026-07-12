@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>FunctionNaming:HomeScreen.kt$@Composable private fun SurahCard( surah: Surah, isFavorite: Boolean, onClick: () -&gt; Unit, onToggleFavorite: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:HomeScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HomeScreen( onSurahSelected: (Int) -&gt; Unit, viewModel: HomeViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:SurahDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SurahDetailScreen( onNavigateBack: () -&gt; Unit, onNavigateNext: (Int) -&gt; Unit, viewModel: SurahDetailViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:Theme.kt$@Composable fun QuranTranscriptionTheme(content: @Composable () -&gt; Unit)</ID>
+    <ID>LargeClass:SurahRepository.kt$SurahRepository</ID>
+    <ID>LongMethod:HomeScreen.kt$@Composable private fun SurahCard( surah: Surah, isFavorite: Boolean, onClick: () -&gt; Unit, onToggleFavorite: () -&gt; Unit, )</ID>
+    <ID>LongMethod:HomeScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HomeScreen( onSurahSelected: (Int) -&gt; Unit, viewModel: HomeViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:MainActivity.kt$MainActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:SurahDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SurahDetailScreen( onNavigateBack: () -&gt; Unit, onNavigateNext: (Int) -&gt; Unit, viewModel: SurahDetailViewModel = hiltViewModel(), )</ID>
+    <ID>NewLineAtEndOfFile:QuranTranscriptionApp.kt$com.ruzibekov.quran.transcription.QuranTranscriptionApp.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

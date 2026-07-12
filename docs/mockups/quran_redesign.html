@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quran Transcription — Redesign Mock</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0D6B5E;
+    --primary-light: #14917F;
+    --primary-dark: #094D44;
+    --primary-surface: #E8F5F1;
+    --primary-glow: rgba(13, 107, 94, 0.15);
+    --gold: #C9A84C;
+    --gold-light: #F5E6B8;
+    --gold-dark: #9A7B2F;
+    --bg: #F0F7F4;
+    --bg-warm: #F8FAF9;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --text-primary: #1A2B25;
+    --text-secondary: #5A6E65;
+    --text-muted: #8A9B93;
+    --border: rgba(13, 107, 94, 0.08);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(13, 107, 94, 0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 30px rgba(13, 107, 94, 0.12), 0 4px 8px rgba(0,0,0,0.04);
+    --shadow-glow: 0 4px 20px rgba(13, 107, 94, 0.2);
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 24px;
+    --radius-xl: 28px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(13,107,94,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  }
+
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 8px solid #1A1A1A;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 2px #333,
+      0 20px 60px rgba(0,0,0,0.3),
+      inset 0 0 0 1px rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
+    z-index: 10;
+  }
+
+  .status-bar .time { font-weight: 700; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons svg { width: 16px; height: 16px; }
+
+  .screen-label {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ==================== HOME SCREEN ==================== */
+  .home-screen {
+    height: calc(100% - 54px);
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, rgba(13,107,94,0.06) 0%, var(--bg) 40%);
+  }
+
+  .home-header {
+    padding: 8px 24px 0;
+  }
+
+  .home-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .home-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+
+  .home-title .accent {
+    color: var(--primary);
+  }
+
+  .home-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .settings-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+
+  .settings-btn:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .search-container {
+    position: relative;
+    margin: 0 0 6px;
+  }
+
+  .search-input {
+    width: 100%;
+    height: 50px;
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    padding: 0 16px 0 48px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.25s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .search-input:focus {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md), 0 0 0 3px var(--primary-glow);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+
+  /* Filter chips */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 24px 8px;
+  }
+
+  .chip {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(13,107,94,0.25);
+  }
+
+  .chip:hover:not(.active) {
+    border-color: var(--primary-light);
+    color: var(--primary);
+  }
+
+  /* Surah List */
+  .surah-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .surah-list::-webkit-scrollbar { display: none; }
+
+  .surah-card {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .surah-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3.5px;
+    background: var(--primary);
+    border-radius: 0 4px 4px 0;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .surah-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(13,107,94,0.12);
+  }
+
+  .surah-card:hover::before {
+    opacity: 1;
+  }
+
+  .surah-card:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  .surah-card.favorite::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at top right, rgba(201,168,76,0.1) 0%, transparent 70%);
+  }
+
+  .surah-number {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .surah-number-bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .surah-number-bg svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .surah-number span {
+    position: relative;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    z-index: 1;
+  }
+
+  .surah-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .surah-name-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+
+  .surah-latin {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+
+  .surah-arabic {
+    font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+    font-size: 16px;
+    color: var(--gold-dark);
+    font-weight: 600;
+    direction: rtl;
+  }
+
+  .surah-snippet {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 3px;
+  }
+
+  .surah-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .meta-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .meta-tag.ayah {
+    background: var(--primary-surface);
+    color: var(--primary);
+  }
+
+  .surah-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .fav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--text-muted);
+  }
+
+  .fav-btn:hover {
+    background: var(--gold-light);
+    color: var(--gold-dark);
+  }
+
+  .fav-btn.active {
+    color: var(--gold);
+    background: var(--gold-light);
+  }
+
+  .chevron-icon {
+    color: var(--text-muted);
+    opacity: 0.4;
+  }
+
+  /* ==================== DETAIL SCREEN ==================== */
+  .detail-screen {
+    height: calc(100% - 54px);
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, rgba(13,107,94,0.07) 0%, var(--bg) 35%);
+  }
+
+  .detail-topbar {
+    display: flex;
+    align-items: center;
+    padding: 4px 16px 12px;
+    gap: 12px;
+  }
+
+  .back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .back-btn:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateX(-2px);
+  }
+
+  .detail-title-area {
+    flex: 1;
+    text-align: center;
+  }
+
+  .detail-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+
+  .detail-subtitle-small {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .detail-spacer {
+    width: 40px;
+  }
+
+  /* Surah Header Card */
+  .surah-header-card {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #1AAB95 100%);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-glow);
+  }
+
+  .surah-header-card::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .surah-header-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .header-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-badge {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    padding: 5px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .header-fav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s;
+  }
+
+  .header-fav-btn:hover {
+    background: rgba(255,255,255,0.25);
+  }
+
+  .header-arabic {
+    font-family: 'Amiri', 'Noto Naskh Arabic', serif;
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    margin: 8px 0;
+    direction: rtl;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    line-height: 1.4;
+  }
+
+  .header-divider {
+    width: 50px;
+    height: 2px;
+    background: rgba(255,255,255,0.3);
+    margin: 12px auto;
+    border-radius: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-meaning {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.85;
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Audio Player */
+  .audio-player {
+    margin: 0 20px 16px;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+  }
+
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .play-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(13,107,94,0.3);
+    transition: all 0.2s;
+  }
+
+  .play-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(13,107,94,0.4);
+  }
+
+  .play-btn:active {
+    transform: scale(0.97);
+  }
+
+  .player-progress-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 5px;
+    background: var(--primary-surface);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 35%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2.5px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .speed-btn {
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .speed-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* Transliteration Text */
+  .transliteration-area {
+    flex: 1;
+    margin: 0 20px;
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .translit-header {
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .translit-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .font-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .font-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .font-btn:hover {
+    background: var(--primary-surface);
+    color: var(--primary);
+    border-color: var(--primary-light);
+  }
+
+  .translit-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px;
+  }
+
+  .translit-content::-webkit-scrollbar { width: 3px; }
+  .translit-content::-webkit-scrollbar-track { background: transparent; }
+  .translit-content::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 3px;
+    opacity: 0.3;
+  }
+
+  .verse-line {
+    font-size: 17px;
+    line-height: 2;
+    color: var(--text-primary);
+    font-weight: 400;
+    letter-spacing: 0.1px;
+  }
+
+  .verse-line .bismillah {
+    color: var(--primary);
+    font-weight: 600;
+    display: block;
+    text-align: center;
+    padding: 4px 0 10px;
+    font-size: 16px;
+    position: relative;
+  }
+
+  .verse-line .bismillah::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1.5px;
+    background: var(--primary-glow);
+    margin: 10px auto 0;
+    border-radius: 1px;
+  }
+
+  .verse-highlight {
+    background: linear-gradient(180deg, transparent 60%, var(--gold-light) 60%);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  /* Navigation Button */
+  .nav-button-area {
+    padding: 16px 20px 28px;
+  }
+
+  .next-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(13,107,94,0.3);
+    transition: all 0.25s;
+    letter-spacing: 0.2px;
+  }
+
+  .next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(13,107,94,0.35);
+  }
+
+  .next-btn:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  .next-btn svg {
+    transition: transform 0.2s;
+  }
+
+  .next-btn:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* ==================== EMPTY STATE ==================== */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    background: var(--primary-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .empty-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Page title */
+  .page-section-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 40px;
+    letter-spacing: -0.3px;
+  }
+
+  /* Bottom home indicator */
+  .home-indicator {
+    height: 34px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+  }
+
+  .home-indicator-bar {
+    width: 134px;
+    height: 5px;
+    background: var(--text-primary);
+    border-radius: 3px;
+    opacity: 0.2;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    body {
+      flex-direction: column;
+      align-items: center;
+      gap: 60px;
+    }
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .surah-card:nth-child(1) { animation: fadeInUp 0.4s ease both; animation-delay: 0.05s; }
+  .surah-card:nth-child(2) { animation: fadeInUp 0.4s ease both; animation-delay: 0.1s; }
+  .surah-card:nth-child(3) { animation: fadeInUp 0.4s ease both; animation-delay: 0.15s; }
+  .surah-card:nth-child(4) { animation: fadeInUp 0.4s ease both; animation-delay: 0.2s; }
+  .surah-card:nth-child(5) { animation: fadeInUp 0.4s ease both; animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- ==================== HOME SCREEN ==================== -->
+<div class="phone-frame" style="position:relative">
+  <span class="screen-label">Home Screen</span>
+  <div class="status-bar">
+    <span class="time">09:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 10h2v4H1zm4-3h2v7H5zm4-3h2v10H9zm4-3h2v13h-2z"/></svg>
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3C5.5 3 3.3 4 1.7 5.7l1.4 1.4C4.4 5.8 6.1 5 8 5s3.6.8 4.9 2.1l1.4-1.4C12.7 4 10.5 3 8 3zm0 4c-1.5 0-2.9.6-3.9 1.6l1.4 1.4c.6-.7 1.5-1 2.5-1s1.9.3 2.5 1l1.4-1.4C10.9 7.6 9.5 7 8 7zm0 4c-.6 0-1.1.2-1.5.6L8 13.2l1.5-1.6c-.4-.4-.9-.6-1.5-.6z"/></svg>
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 5H2a1 1 0 00-1 1v4a1 1 0 001 1h12a1 1 0 001-1V6a1 1 0 00-1-1zm-1 4H3V7h10v3z"/></svg>
+    </div>
+  </div>
+
+  <div class="home-screen">
+    <div class="home-header">
+      <div class="home-title-row">
+        <div>
+          <div class="home-title">Қуръон <span class="accent">суралар</span></div>
+          <div class="home-subtitle">114 сура — ўзбек транслитерация</div>
+        </div>
+        <div class="settings-btn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg>
+        </div>
+      </div>
+
+      <div class="search-container">
+        <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="search-input" placeholder="Сура номи бўйича қидириш" />
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <div class="chip active">Барчаси</div>
+      <div class="chip">
+        <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:3px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Севимлилар
+      </div>
+      <div class="chip">Маккий</div>
+      <div class="chip">Маданий</div>
+    </div>
+
+    <div class="surah-list">
+      <!-- Card 1 - Favorite -->
+      <div class="surah-card favorite">
+        <div class="surah-number">
+          <div class="surah-number-bg">
+            <svg viewBox="0 0 46 46" fill="none">
+              <path d="M23 2l5.1 8.5 9.8 1.5-7 6.9 1.7 9.8L23 24l-9.6 4.7 1.7-9.8-7-6.9 9.8-1.5z" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="0.5" opacity="0.6"/>
+              <circle cx="23" cy="23" r="18" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="1" opacity="0.4"/>
+            </svg>
+          </div>
+          <span>1</span>
+        </div>
+        <div class="surah-info">
+          <div class="surah-name-row">
+            <span class="surah-latin">Al-Fatihah</span>
+            <span class="surah-arabic">الفاتحة</span>
+          </div>
+          <div class="surah-snippet">Бисмиллааҳир роҳмаанир роҳийм</div>
+          <div class="surah-meta">
+            <span class="meta-tag ayah">7 оят</span>
+          </div>
+        </div>
+        <div class="surah-actions">
+          <button class="fav-btn active">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <svg class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="surah-card">
+        <div class="surah-number">
+          <div class="surah-number-bg">
+            <svg viewBox="0 0 46 46" fill="none">
+              <path d="M23 2l5.1 8.5 9.8 1.5-7 6.9 1.7 9.8L23 24l-9.6 4.7 1.7-9.8-7-6.9 9.8-1.5z" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="0.5" opacity="0.6"/>
+              <circle cx="23" cy="23" r="18" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="1" opacity="0.4"/>
+            </svg>
+          </div>
+          <span>2</span>
+        </div>
+        <div class="surah-info">
+          <div class="surah-name-row">
+            <span class="surah-latin">Al-Baqarah</span>
+            <span class="surah-arabic">البقرة</span>
+          </div>
+          <div class="surah-snippet">Бисмиллааҳир роҳмаанир роҳийм</div>
+          <div class="surah-meta">
+            <span class="meta-tag ayah">286 оят</span>
+          </div>
+        </div>
+        <div class="surah-actions">
+          <button class="fav-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <svg class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="surah-card">
+        <div class="surah-number">
+          <div class="surah-number-bg">
+            <svg viewBox="0 0 46 46" fill="none">
+              <path d="M23 2l5.1 8.5 9.8 1.5-7 6.9 1.7 9.8L23 24l-9.6 4.7 1.7-9.8-7-6.9 9.8-1.5z" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="0.5" opacity="0.6"/>
+              <circle cx="23" cy="23" r="18" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="1" opacity="0.4"/>
+            </svg>
+          </div>
+          <span>3</span>
+        </div>
+        <div class="surah-info">
+          <div class="surah-name-row">
+            <span class="surah-latin">Ali 'Imran</span>
+            <span class="surah-arabic">آل عمران</span>
+          </div>
+          <div class="surah-snippet">Бисмиллааҳир роҳмаанир роҳийм</div>
+          <div class="surah-meta">
+            <span class="meta-tag ayah">200 оят</span>
+          </div>
+        </div>
+        <div class="surah-actions">
+          <button class="fav-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <svg class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="surah-card">
+        <div class="surah-number">
+          <div class="surah-number-bg">
+            <svg viewBox="0 0 46 46" fill="none">
+              <path d="M23 2l5.1 8.5 9.8 1.5-7 6.9 1.7 9.8L23 24l-9.6 4.7 1.7-9.8-7-6.9 9.8-1.5z" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="0.5" opacity="0.6"/>
+              <circle cx="23" cy="23" r="18" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="1" opacity="0.4"/>
+            </svg>
+          </div>
+          <span>4</span>
+        </div>
+        <div class="surah-info">
+          <div class="surah-name-row">
+            <span class="surah-latin">An-Nisa</span>
+            <span class="surah-arabic">النساء</span>
+          </div>
+          <div class="surah-snippet">Бисмиллааҳир роҳмаанир роҳийм</div>
+          <div class="surah-meta">
+            <span class="meta-tag ayah">176 оят</span>
+          </div>
+        </div>
+        <div class="surah-actions">
+          <button class="fav-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <svg class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="surah-card">
+        <div class="surah-number">
+          <div class="surah-number-bg">
+            <svg viewBox="0 0 46 46" fill="none">
+              <path d="M23 2l5.1 8.5 9.8 1.5-7 6.9 1.7 9.8L23 24l-9.6 4.7 1.7-9.8-7-6.9 9.8-1.5z" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="0.5" opacity="0.6"/>
+              <circle cx="23" cy="23" r="18" fill="var(--primary-surface)" stroke="var(--primary)" stroke-width="1" opacity="0.4"/>
+            </svg>
+          </div>
+          <span>5</span>
+        </div>
+        <div class="surah-info">
+          <div class="surah-name-row">
+            <span class="surah-latin">Al-Ma'idah</span>
+            <span class="surah-arabic">المائدة</span>
+          </div>
+          <div class="surah-snippet">Бисмиллааҳир роҳмаанир роҳийм</div>
+          <div class="surah-meta">
+            <span class="meta-tag ayah">120 оят</span>
+          </div>
+        </div>
+        <div class="surah-actions">
+          <button class="fav-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+          <svg class="chevron-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-indicator">
+      <div class="home-indicator-bar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DETAIL SCREEN ==================== -->
+<div class="phone-frame" style="position:relative">
+  <span class="screen-label">Detail Screen</span>
+  <div class="status-bar">
+    <span class="time">09:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 10h2v4H1zm4-3h2v7H5zm4-3h2v10H9zm4-3h2v13h-2z"/></svg>
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3C5.5 3 3.3 4 1.7 5.7l1.4 1.4C4.4 5.8 6.1 5 8 5s3.6.8 4.9 2.1l1.4-1.4C12.7 4 10.5 3 8 3zm0 4c-1.5 0-2.9.6-3.9 1.6l1.4 1.4c.6-.7 1.5-1 2.5-1s1.9.3 2.5 1l1.4-1.4C10.9 7.6 9.5 7 8 7zm0 4c-.6 0-1.1.2-1.5.6L8 13.2l1.5-1.6c-.4-.4-.9-.6-1.5-.6z"/></svg>
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 5H2a1 1 0 00-1 1v4a1 1 0 001 1h12a1 1 0 001-1V6a1 1 0 00-1-1zm-1 4H3V7h10v3z"/></svg>
+    </div>
+  </div>
+
+  <div class="detail-screen">
+    <div class="detail-topbar">
+      <div class="back-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </div>
+      <div class="detail-title-area">
+        <div class="detail-title">Al-Fatihah</div>
+        <div class="detail-subtitle-small">Сура № 1</div>
+      </div>
+      <div class="detail-spacer"></div>
+    </div>
+
+    <!-- Surah Header Card -->
+    <div class="surah-header-card">
+      <div class="header-top-row">
+        <span class="header-badge">Маккий</span>
+        <button class="header-fav-btn">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </button>
+      </div>
+      <div class="header-arabic">الفاتحة</div>
+      <div class="header-divider"></div>
+      <div class="header-meaning">Очилиш — 7 оят</div>
+    </div>
+
+    <!-- Audio Player -->
+    <div class="audio-player">
+      <div class="player-controls">
+        <button class="play-btn">
+          <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="player-progress-area">
+          <div class="progress-track">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="time-row">
+            <span>1:23</span>
+            <span>3:45</span>
+          </div>
+        </div>
+        <button class="speed-btn">1x</button>
+      </div>
+    </div>
+
+    <!-- Transliteration -->
+    <div class="transliteration-area">
+      <div class="translit-header">
+        <span class="translit-label">Транслитерация</span>
+        <div class="font-size-controls">
+          <button class="font-btn">A-</button>
+          <button class="font-btn">A+</button>
+        </div>
+      </div>
+      <div class="translit-content">
+        <div class="verse-line">
+          <span class="bismillah">Бисмиллааҳир роҳмаанир роҳийм</span>
+          Алҳамду лиллооҳи роббил ъааламийн
+          <br>Аррохмаанир роҳийм
+          <br>Маалики йавмид-дийн
+          <br>Иййаака наъбуду ва иййаака настаъийн
+          <br>Иҳдина ссироотал мустақийм
+          <br>Сирооталлозийна анъамта
+          <br>ъалайҳим ғайрил-мағзуууби
+          <br>ъалайҳим ва лад-длоооллийн
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Button -->
+    <div class="nav-button-area">
+      <button class="next-btn">
+        Keyingisi — Al-Baqarah
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

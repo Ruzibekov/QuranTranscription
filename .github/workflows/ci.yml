@@ -1,0 +1,33 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - dev
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Just
+        uses: taiki-e/install-action@just
+
+      - name: Grant Gradle Permission
+        run: chmod +x gradlew
+
+      - name: Verify
+        run: just verify

@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -65,8 +65,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.style.TextOverflow
 import com.ruzibekov.quran.transcription.ui.theme.ArabicFontFamily
-import com.ruzibekov.quran.transcription.ui.theme.PrimaryGreenLight
+import com.ruzibekov.quran.transcription.ui.theme.LocalSurahHeaderGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,10 +139,20 @@ fun SurahDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "Сура топилмади",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Сура топилмади",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onNavigateBack,
+                            modifier = Modifier.defaultMinSize(minHeight = 44.dp),
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Text(text = "Орқага қайтиш")
+                        }
+                    }
                 }
             } else {
                 val allLines = remember(surah) {
@@ -212,6 +223,12 @@ fun SurahDetailScreen(
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.outline,
                                 )
+                            } else if (isLandscape) {
+                                Text(
+                                    text = "${surah.revelationType} \u2022 $verseCount оят",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.outline,
+                                )
                             }
                         }
 
@@ -251,23 +268,11 @@ fun SurahDetailScreen(
                             color = Color.Transparent,
                         ) {
                             val isMadaniy = surah.revelationType == "Маданий"
-                            val headerGradient = if (isMadaniy) {
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        Color(0xFF0A5C6B),
-                                        Color(0xFF148A91),
-                                        Color(0xFF1AABB0),
-                                    ),
-                                )
-                            } else {
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,
-                                        PrimaryGreenLight,
-                                        Color(0xFF1AAB95),
-                                    ),
-                                )
-                            }
+                            val gradientColors = LocalSurahHeaderGradient.current
+                            val headerGradient = Brush.linearGradient(
+                                colors = if (isMadaniy) gradientColors.madaniyColors
+                                else gradientColors.makkiyColors,
+                            )
 
                             Box(
                                 modifier = Modifier
@@ -342,7 +347,7 @@ fun SurahDetailScreen(
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     Text(
-                                        text = "Очилиш — $verseCount оят",
+                                        text = "${surah.revelationType} — $verseCount оят",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Color.White.copy(alpha = 0.85f),
                                     )
@@ -532,7 +537,10 @@ fun SurahDetailScreen(
                                                     shape = CircleShape,
                                                     color = if (isActive) MaterialTheme.colorScheme.primary
                                                     else MaterialTheme.colorScheme.primaryContainer,
-                                                    modifier = Modifier.size(if (isFullScreen) 28.dp else 32.dp),
+                                                    modifier = Modifier.defaultMinSize(
+                                                        minWidth = if (isFullScreen) 28.dp else 32.dp,
+                                                        minHeight = if (isFullScreen) 28.dp else 32.dp,
+                                                    ),
                                                 ) {
                                                     Box(
                                                         modifier = Modifier.fillMaxSize(),
@@ -568,7 +576,7 @@ fun SurahDetailScreen(
                                                 ) {
                                                     Box(
                                                         modifier = Modifier
-                                                            .fillMaxWidth(0.6f)
+                                                            .fillMaxWidth(if (isFullScreen) 0.4f else 0.6f)
                                                             .height(1.dp)
                                                             .background(
                                                                 brush = Brush.horizontalGradient(
@@ -658,7 +666,7 @@ fun SurahDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 20.dp)
-                                    .height(46.dp)
+                                    .defaultMinSize(minHeight = 46.dp)
                                     .graphicsLayer {
                                         scaleX = btnScale
                                         scaleY = btnScale
@@ -677,11 +685,13 @@ fun SurahDetailScreen(
                                     text = "Keyingisi — ${nextSurahName ?: ""}",
                                     style = MaterialTheme.typography.titleMedium,
                                     maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
+                                    contentDescription = "Keyingisi",
                                     modifier = Modifier.size(18.dp),
                                 )
                             }
@@ -718,35 +728,40 @@ private fun FontSizeControls(
     onDecrease: () -> Unit,
     onIncrease: () -> Unit,
 ) {
+    val canDecrease = fontSizeSp > 14
+    val canIncrease = fontSizeSp < 22
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
             onClick = onDecrease,
+            enabled = canDecrease,
             shape = RoundedCornerShape(10.dp),
-            color = if (fontSizeSp <= 14)
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = if (canDecrease) 0.5f else 0.25f,
+            ),
             modifier = Modifier.size(34.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = "A-",
+                    text = "A\u2212",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (fontSizeSp <= 14)
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                        alpha = if (canDecrease) 1f else 0.4f,
+                    ),
                 )
             }
         }
         Surface(
             onClick = onIncrease,
+            enabled = canIncrease,
             shape = RoundedCornerShape(10.dp),
-            color = if (fontSizeSp >= 22)
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = if (canIncrease) 0.5f else 0.25f,
+            ),
             modifier = Modifier.size(34.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -754,9 +769,9 @@ private fun FontSizeControls(
                     text = "A+",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (fontSizeSp >= 22)
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                        alpha = if (canIncrease) 1f else 0.4f,
+                    ),
                 )
             }
         }

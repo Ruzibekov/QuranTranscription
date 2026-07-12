@@ -9,6 +9,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -38,13 +40,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -116,6 +122,10 @@ fun HomeScreen(
             listState.firstVisibleItemIndex == 0 &&
                 listState.firstVisibleItemScrollOffset < 100
         }
+    }
+
+    val showScrollToTop by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 5 }
     }
 
     val backgroundBrush = Brush.verticalGradient(
@@ -197,7 +207,7 @@ fun HomeScreen(
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Search,
-                                contentDescription = null,
+                                contentDescription = "Қидириш",
                                 tint = MaterialTheme.colorScheme.outline,
                             )
                         },
@@ -254,9 +264,16 @@ fun HomeScreen(
                     }
                     item {
                         FilterChip(
-                            text = "⭐ Севимлилар",
+                            text = "Севимлилар",
                             selected = uiState.selectedFilter == SurahFilter.FAVORITES,
                             onClick = { viewModel.selectFilter(SurahFilter.FAVORITES) },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                )
+                            },
                         )
                     }
                 }
@@ -292,7 +309,8 @@ fun HomeScreen(
                                     Icon(
                                         imageVector = if (isFavoritesFilter) Icons.Outlined.Star
                                         else Icons.Filled.Search,
-                                        contentDescription = null,
+                                        contentDescription = if (isFavoritesFilter) "Севимли суралар йўқ"
+                                        else "Натижа топилмади",
                                         modifier = Modifier.size(40.dp),
                                         tint = if (isFavoritesFilter) MaterialTheme.colorScheme.secondary
                                         else MaterialTheme.colorScheme.primary,
@@ -308,7 +326,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = if (isFavoritesFilter) "⭐ белгисини босиб сура қўшинг"
+                                text = if (isFavoritesFilter) "Юлдуз белгисини босиб сура қўшинг"
                                 else "Бошқа калит сўз билан қидириб кўринг",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.outline,
@@ -324,6 +342,7 @@ fun HomeScreen(
                         contentPadding = PaddingValues(
                             start = 20.dp,
                             end = 20.dp,
+                            top = 4.dp,
                             bottom = 24.dp,
                         ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -367,6 +386,35 @@ fun HomeScreen(
                 }
             }
         }
+
+        AnimatedVisibility(
+            visible = showScrollToTop,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(end = 20.dp, bottom = 20.dp),
+            enter = scaleIn(animationSpec = tween(200)) + fadeIn(),
+            exit = scaleOut(animationSpec = tween(200)) + fadeOut(),
+        ) {
+            Surface(
+                onClick = {
+                    scope.launch { listState.animateScrollToItem(0) }
+                },
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shadowElevation = 6.dp,
+                modifier = Modifier.size(48.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardArrowUp,
+                        contentDescription = "Yuqoriga",
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -375,6 +423,7 @@ private fun FilterChip(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
+    icon: @Composable (() -> Unit)? = null,
 ) {
     Surface(
         onClick = onClick,
@@ -387,11 +436,17 @@ private fun FilterChip(
         ),
         shadowElevation = if (selected) 2.dp else 0.dp,
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
+        Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            icon?.invoke()
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
     }
 }
 
@@ -481,6 +536,8 @@ private fun SurahCard(
                         text = surah.latinName,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = surah.arabicName,
@@ -490,6 +547,8 @@ private fun SurahCard(
                             fontSize = 16.sp,
                         ),
                         color = MaterialTheme.colorScheme.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
